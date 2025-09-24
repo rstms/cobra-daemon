@@ -27,7 +27,7 @@ import (
 	"runtime"
 )
 
-const Version = "0.0.3"
+const Version = "0.0.4"
 
 type Daemon interface {
 	Install() error
