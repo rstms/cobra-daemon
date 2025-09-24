@@ -185,7 +185,7 @@ return 0 if netboot/winexec daemon is running, 1 if not
 	},
 }
 
-func AddDaemonCommand(rootCmd *cobra.Command, init func() (DaemonProcess, error)) {
+func AddDaemonCommands(rootCmd *cobra.Command, init func() (DaemonProcess, error)) {
 	factory = init
 	CobraAddCommand(rootCmd, rootCmd, daemonCmd)
 	CobraAddCommand(rootCmd, daemonCmd, daemonInstallCmd)
