@@ -25,7 +25,6 @@ package daemon
 import (
 	_ "embed"
 	"fmt"
-	"github.com/rstms/go-common"
 	"io"
 	"os"
 	"os/exec"
@@ -87,23 +86,23 @@ func (d *RCDaemon) Install() error {
 	if d.Executable != d.serviceBin {
 		src, err := os.Open(d.Executable)
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 		defer src.Close()
 		dst, err := os.OpenFile(d.serviceBin, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0755)
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 		defer dst.Close()
 		_, err = io.Copy(dst, src)
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 	}
 	rcFile := filepath.Join("/etc/rc.d", d.Name)
 	err := os.WriteFile(rcFile, []byte(rcData), 0700)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -119,15 +118,15 @@ func (d *RCDaemon) rcctl(command string) error {
 func (d *RCDaemon) Delete() error {
 	err := d.rcctl("stop")
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = d.rcctl("disable")
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = os.Remove(filepath.Join("/etc/rc.d", d.Name))
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -135,11 +134,11 @@ func (d *RCDaemon) Delete() error {
 func (d *RCDaemon) Start() error {
 	err := d.rcctl("enable")
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = d.rcctl("start")
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -147,7 +146,7 @@ func (d *RCDaemon) Start() error {
 func (d *RCDaemon) Stop() error {
 	err := d.rcctl("stop")
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -155,7 +154,7 @@ func (d *RCDaemon) Stop() error {
 func (d *RCDaemon) GetConfig() (string, error) {
 	config, err := exec.Command("rcctl", "get", d.Name).Output()
 	if err != nil {
-		return "", common.Fatal(err)
+		return "", fatal(err)
 	}
 	return string(config), nil
 }
@@ -167,7 +166,7 @@ func (d *RCDaemon) Query() (bool, error) {
 	case nil:
 	case *exec.ExitError:
 	default:
-		return false, common.Fatal(err)
+		return false, fatal(err)
 	}
 	exitCode := cmd.ProcessState.ExitCode()
 	return exitCode == 0, nil

@@ -99,7 +99,7 @@ func (d *Daemontools) enable() error {
 	if common.IsFile(downFile) {
 		err := os.Remove(downFile)
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 	}
 	return nil
@@ -110,7 +110,7 @@ func (d *Daemontools) disable() error {
 	if !common.IsFile(downFile) {
 		err := os.WriteFile(downFile, []byte{}, 0600)
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 	}
 	return nil
@@ -120,7 +120,7 @@ func (d *Daemontools) Install() error {
 
 	gid, err := strconv.Atoi(d.Gid)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = os.MkdirAll("/var/svc.d", 0755)
 	if err != nil {
@@ -137,40 +137,40 @@ func (d *Daemontools) Install() error {
 	}
 	err = os.WriteFile(filepath.Join(dir, "run"), d.templateData(runTemplate), 0700)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = os.WriteFile(filepath.Join(dir, "log", "run"), d.templateData(logTemplate), 0700)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	ifp, err := os.Open(d.Executable)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	defer ifp.Close()
 	ofp, err := os.OpenFile(d.serviceBin, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0755)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	_, err = io.Copy(ofp, ifp)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 
 	logdir := filepath.Join("/var/log", d.Name)
 	if !common.IsDir(logdir) {
 		err = os.Mkdir(logdir, 0770)
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 	}
 	err = os.WriteFile(filepath.Join(dir, "down"), []byte{}, 0600)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = os.Symlink(dir, d.service)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -178,31 +178,31 @@ func (d *Daemontools) Install() error {
 func (d *Daemontools) Delete() error {
 	running, err := d.svstat(d.service)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	if running {
 		err := d.Stop()
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 	}
 	logRunning, err := d.svstat(filepath.Join(d.service, "log"))
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	if logRunning {
 		err = exec.Command("svc", "-d", filepath.Join(d.service, "log")).Run()
 		if err != nil {
-			return common.Fatal(err)
+			return fatal(err)
 		}
 	}
 	err = os.RemoveAll(d.service)
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = os.RemoveAll(filepath.Join("/var/svc.d", d.Name))
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -210,11 +210,11 @@ func (d *Daemontools) Delete() error {
 func (d *Daemontools) Start() error {
 	err := d.enable()
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	err = exec.Command("svc", "-u", d.service).Run()
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -222,7 +222,7 @@ func (d *Daemontools) Start() error {
 func (d *Daemontools) Stop() error {
 	err := exec.Command("svc", "-d", d.service).Run()
 	if err != nil {
-		return common.Fatal(err)
+		return fatal(err)
 	}
 	return nil
 }
@@ -230,7 +230,7 @@ func (d *Daemontools) Stop() error {
 func (d *Daemontools) GetConfig() (string, error) {
 	runData, err := os.ReadFile(filepath.Join(d.service, "run"))
 	if err != nil {
-		return "", common.Fatal(err)
+		return "", fatal(err)
 	}
 	return string(runData), nil
 }
@@ -238,7 +238,7 @@ func (d *Daemontools) GetConfig() (string, error) {
 func (d *Daemontools) Query() (bool, error) {
 	running, err := d.svstat(d.service)
 	if err != nil {
-		return false, common.Fatal(err)
+		return false, fatal(err)
 	}
 	return running, nil
 }
@@ -246,15 +246,15 @@ func (d *Daemontools) Query() (bool, error) {
 func (d *Daemontools) svstat(serviceDir string) (bool, error) {
 	stdout, err := exec.Command("svstat", serviceDir).Output()
 	if err != nil {
-		return false, common.Fatal(err)
+		return false, fatal(err)
 	}
 	status := strings.TrimSpace(string(stdout))
 	fields := strings.Fields(status)
 	if len(fields) < 2 {
-		return false, common.Fatalf("unexpected svstat output: %s", status)
+		return false, fatalf("unexpected svstat output: %s", status)
 	}
 	if fields[0] != serviceDir+":" {
-		return false, common.Fatalf("unexpected svstat dir output: %s", fields[0])
+		return false, fatalf("unexpected svstat dir output: %s", fields[0])
 	}
 	running := false
 	if fields[1] == "up" {
