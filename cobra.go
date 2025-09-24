@@ -48,6 +48,7 @@ Windows  | schtasks.exe | internal XML config
 }
 
 func initDaemon() CobraDaemon {
+
 	if len(daemonArgs) > 0 {
 		ViperSetDefault("daemon.name", daemonArgs[0])
 	}
@@ -56,9 +57,9 @@ func initDaemon() CobraDaemon {
 	cobra.CheckErr(err)
 	ViperSetDefault("daemon.user", systemUser.Username)
 
-	homeDir, err := os.UserHomeDir()
+	daemonUser, err := user.Lookup(ViperGetString("daemon.user"))
 	cobra.CheckErr(err)
-	ViperSetDefault("daemon.dir", homeDir)
+	ViperSetDefault("daemon.dir", daemonUser.HomeDir)
 
 	name := ViperGetString("daemon.name")
 	user := ViperGetString("daemon.user")
