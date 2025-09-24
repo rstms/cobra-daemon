@@ -205,5 +205,5 @@ func AddDaemonCommands(rootCmd *cobra.Command, args ...string) {
 	common.OptionString(daemonCmd, "name", "", "", "daemon name")
 	common.OptionString(daemonCmd, "user", "", "", "run as username")
 	common.OptionString(daemonCmd, "dir", "", "", "run directory")
-	common.OptionString(daemonQueryCmd, "quiet", "q", "", "suppress output")
+	common.OptionSwitch(daemonQueryCmd, "quiet", "q", "suppress output")
 }
