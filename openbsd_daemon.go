@@ -31,6 +31,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -52,6 +53,25 @@ func NewRCDaemon(name string, daemonUser *user.User, runDir string, command stri
 
 	logFile := filepath.Join("/var/log", name)
 	_, basename := filepath.Split(command)
+	if !common.IsFile(logFile) {
+		file, err := os.Create(logFile)
+		if err != nil {
+			return nil, common.Fatal(err)
+		}
+		file.Close()
+	}
+	gid, err := strconv.Atoi(daemonUser.Gid)
+	if err != nil {
+		return nil, common.Fatal(err)
+	}
+	err = os.Chown(logFile, -1, gid)
+	if err != nil {
+		return nil, common.Fatal(err)
+	}
+	err = os.Chmod(logFile, 0660)
+	if err != nil {
+		return nil, common.Fatal(err)
+	}
 
 	t := RCDaemon{
 		Name:       name,
