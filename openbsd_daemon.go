@@ -58,7 +58,7 @@ func NewRCDaemon(name string, daemonUser *user.User, runDir string, command stri
 		Username:   daemonUser.Username,
 		Uid:        daemonUser.Uid,
 		Executable: command,
-		Args:       strings.Join(append(args, "-L", logFile), " "),
+		Args:       strings.Join(append(args, "--logfile", logFile), " "),
 		Dir:        runDir,
 		LogFile:    logFile,
 		serviceBin: filepath.Join("/usr/local/bin", basename),

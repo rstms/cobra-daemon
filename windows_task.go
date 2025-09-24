@@ -55,7 +55,7 @@ func NewWindowsTask(taskName string, taskUser *user.User, taskDir string, taskCo
 		return nil, common.Fatal(err)
 	}
 	logFile := filepath.Join(logDir, taskName+"-task.log")
-	taskArgs = append(taskArgs, "-L", logFile)
+	taskArgs = append(taskArgs, "--logfile", logFile)
 	t := WindowsTask{
 		Name:       taskName,
 		Username:   taskUser.Username,
