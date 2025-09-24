@@ -174,12 +174,19 @@ return 0 if netboot/winexec daemon is running, 1 if not
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		d := initDaemon()
+		quiet := common.ViperGetBool("daemon.query.quiet")
 		running, err := d.Query()
-		if !common.ViperGetBool("quiet") {
+		if !quiet {
 			cobra.CheckErr(err)
 		}
 		if running {
+			if !quiet {
+				fmt.Println("running")
+			}
 			os.Exit(0)
+		}
+		if !quiet {
+			fmt.Println("stopped")
 		}
 		os.Exit(1)
 	},
@@ -198,4 +205,5 @@ func AddDaemonCommands(rootCmd *cobra.Command, args ...string) {
 	common.OptionString(daemonCmd, "name", "", "", "daemon name")
 	common.OptionString(daemonCmd, "user", "", "", "run as username")
 	common.OptionString(daemonCmd, "dir", "", "", "run directory")
+	common.OptionString(daemonQueryCmd, "quiet", "q", "", "suppress output")
 }
