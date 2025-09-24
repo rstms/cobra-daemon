@@ -43,12 +43,12 @@ func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon
 
 	taskUser, err := user.Current()
 	if err != nil {
-		return nil, fatal(err)
+		return nil, common.Fatal(err)
 	}
 	if username != "" {
 		taskUser, err = user.Lookup(username)
 		if err != nil {
-			return nil, fatal(err)
+			return nil, common.Fatal(err)
 		}
 	}
 
@@ -58,7 +58,7 @@ func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon
 	}
 
 	if !common.IsDir(taskDir) {
-		return nil, fatalf("not directory: %s", taskDir)
+		return nil, common.Fatalf("not directory: %s", taskDir)
 	}
 
 	var daemon CobraDaemon
@@ -66,20 +66,20 @@ func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon
 	case "windows":
 		daemon, err = NewWindowsTask(name, taskUser, taskDir, command, args...)
 		if err != nil {
-			return nil, fatal(err)
+			return nil, common.Fatal(err)
 		}
 	case "openbsd":
 		daemon, err = NewRCDaemon(name, taskUser, taskDir, command, args...)
 		if err != nil {
-			return nil, fatal(err)
+			return nil, common.Fatal(err)
 		}
 	case "linux":
 		daemon, err = NewDaemontools(name, taskUser, taskDir, command, args...)
 		if err != nil {
-			return nil, fatal(err)
+			return nil, common.Fatal(err)
 		}
 	default:
-		return nil, fatalf("unsuported os: %s", runtime.GOOS)
+		return nil, common.Fatalf("unsuported os: %s", runtime.GOOS)
 	}
 	return daemon, nil
 }
