@@ -26,6 +26,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"github.com/rstms/go-common"
 	"os"
 	"os/exec"
 	"os/user"
@@ -51,7 +52,7 @@ func NewWindowsTask(taskName string, taskUser *user.User, taskDir string, taskCo
 	logDir := filepath.Join(taskUser.HomeDir, "logs")
 	err := os.MkdirAll(logDir, 0700)
 	if err != nil {
-		return nil, Fatal(err)
+		return nil, common.Fatal(err)
 	}
 	logFile := filepath.Join(logDir, taskName+"-task.log")
 	taskArgs = append(taskArgs, "-L", logFile)
@@ -79,7 +80,7 @@ func (t *WindowsTask) taskScheduler(cmd string, args ...string) (int, string, er
 	exitCode := command.ProcessState.ExitCode()
 	estr := strings.TrimSpace(stderr.String())
 	ostr := strings.TrimSpace(stdout.String())
-	if ViperGetBool("verbose") {
+	if common.ViperGetBool("verbose") {
 		fmt.Printf("%s\n", ostr)
 	}
 	if err != nil {
@@ -111,21 +112,21 @@ func (t *WindowsTask) Install() error {
 
 	tempDir, err := os.MkdirTemp("", "task-create-*")
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
 	xmlFile := filepath.Join(tempDir, "task.xml")
 	err = os.WriteFile(filepath.Join(tempDir, "task.xml"), []byte(xmlData), 0600)
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	createArgs := []string{
 		"/XML", xmlFile,
 	}
 	_, _, err = t.taskScheduler("CREATE", createArgs...)
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	return nil
 }
@@ -133,11 +134,11 @@ func (t *WindowsTask) Install() error {
 func (t *WindowsTask) Delete() error {
 	_, _, err := t.taskScheduler("END")
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	_, _, err = t.taskScheduler("DELETE", "/F")
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	return nil
 }
@@ -145,7 +146,7 @@ func (t *WindowsTask) Delete() error {
 func (t *WindowsTask) Start() error {
 	_, _, err := t.taskScheduler("RUN")
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	return nil
 }
@@ -153,7 +154,7 @@ func (t *WindowsTask) Start() error {
 func (t *WindowsTask) Stop() error {
 	_, _, err := t.taskScheduler("END")
 	if err != nil {
-		return Fatal(err)
+		return common.Fatal(err)
 	}
 	return nil
 }
@@ -161,7 +162,7 @@ func (t *WindowsTask) Stop() error {
 func (t *WindowsTask) GetConfig() (string, error) {
 	_, out, err := t.taskScheduler("QUERY", "/XML", "ONE")
 	if err != nil {
-		return "", Fatal(err)
+		return "", common.Fatal(err)
 	}
 	return out, nil
 }
@@ -170,7 +171,7 @@ func (t *WindowsTask) Query() (bool, error) {
 
 	_, stdout, err := t.taskScheduler("QUERY", "/FO", "csv", "/NH")
 	if err != nil {
-		return false, Fatal(err)
+		return false, common.Fatal(err)
 	}
 	fields := []string{}
 	lines := strings.Split(stdout, "\n")
@@ -178,11 +179,11 @@ func (t *WindowsTask) Query() (bool, error) {
 		fields = strings.Split(lines[0], ",")
 	}
 	if len(lines) != 1 || len(fields) != 3 {
-		return false, Fatalf("unexpected output: %v", stdout)
+		return false, common.Fatalf("unexpected output: %v", stdout)
 	}
 	taskName := `"\` + t.Name + `"`
 	if fields[0] != taskName {
-		return false, Fatalf("unexpected task name: %s", fields[0])
+		return false, common.Fatalf("unexpected task name: %s", fields[0])
 	}
 	if fields[2] == `"Running"` {
 		return true, nil

@@ -23,6 +23,7 @@ package daemon
 
 import (
 	"fmt"
+	"github.com/rstms/go-common"
 	"github.com/spf13/cobra"
 	"os"
 	"os/user"
@@ -50,22 +51,22 @@ Windows  | schtasks.exe | internal XML config
 func initDaemon() CobraDaemon {
 
 	if len(daemonArgs) < 1 {
-		cobra.CheckErr(Fatalf("missing daemon args"))
+		cobra.CheckErr(common.Fatalf("missing daemon args"))
 	}
 
-	ViperSetDefault("daemon.name", daemonArgs[0])
+	common.ViperSetDefault("daemon.name", daemonArgs[0])
 
 	systemUser, err := user.Current()
 	cobra.CheckErr(err)
-	ViperSetDefault("daemon.user", systemUser.Username)
+	common.ViperSetDefault("daemon.user", systemUser.Username)
 
-	daemonUser, err := user.Lookup(ViperGetString("daemon.user"))
+	daemonUser, err := user.Lookup(common.ViperGetString("daemon.user"))
 	cobra.CheckErr(err)
-	ViperSetDefault("daemon.dir", daemonUser.HomeDir)
+	common.ViperSetDefault("daemon.dir", daemonUser.HomeDir)
 
-	name := ViperGetString("daemon.name")
-	user := ViperGetString("daemon.user")
-	dir := ViperGetString("daemon.dir")
+	name := common.ViperGetString("daemon.name")
+	user := common.ViperGetString("daemon.user")
+	dir := common.ViperGetString("daemon.dir")
 	executable, err := os.Executable()
 	cobra.CheckErr(err)
 	d, err := NewDaemon(name, user, dir, filepath.Clean(executable), daemonArgs...)
@@ -83,7 +84,7 @@ install netboot/winexec daemon config
 	Run: func(cmd *cobra.Command, args []string) {
 		d := initDaemon()
 		_, err := d.GetConfig()
-		if err == nil && ViperGetBool("force") {
+		if err == nil && common.ViperGetBool("force") {
 			err := d.Delete()
 			cobra.CheckErr(err)
 		}
@@ -174,7 +175,7 @@ return 0 if netboot/winexec daemon is running, 1 if not
 	Run: func(cmd *cobra.Command, args []string) {
 		d := initDaemon()
 		running, err := d.Query()
-		if !ViperGetBool("quiet") {
+		if !common.ViperGetBool("quiet") {
 			cobra.CheckErr(err)
 		}
 		if running {
@@ -186,15 +187,15 @@ return 0 if netboot/winexec daemon is running, 1 if not
 
 func AddDaemonCommands(rootCmd *cobra.Command, args ...string) {
 	daemonArgs = append([]string{rootCmd.Name()}, args...)
-	CobraAddCommand(rootCmd, rootCmd, daemonCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonInstallCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonStartCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonStopCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonRestartCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonDeleteCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonShowCmd)
-	CobraAddCommand(rootCmd, daemonCmd, daemonQueryCmd)
-	OptionString(daemonCmd, "name", "", "", "daemon name")
-	OptionString(daemonCmd, "user", "", "", "run as username")
-	OptionString(daemonCmd, "dir", "", "", "run directory")
+	common.CobraAddCommand(rootCmd, rootCmd, daemonCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonInstallCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonStartCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonStopCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonRestartCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonDeleteCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonShowCmd)
+	common.CobraAddCommand(rootCmd, daemonCmd, daemonQueryCmd)
+	common.OptionString(daemonCmd, "name", "", "", "daemon name")
+	common.OptionString(daemonCmd, "user", "", "", "run as username")
+	common.OptionString(daemonCmd, "dir", "", "", "run directory")
 }

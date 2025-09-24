@@ -23,6 +23,7 @@ THE SOFTWARE.
 package daemon
 
 import (
+	"github.com/rstms/go-common"
 	"os/user"
 	"runtime"
 )
@@ -42,12 +43,12 @@ func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon
 
 	taskUser, err := user.Current()
 	if err != nil {
-		return nil, Fatal(err)
+		return nil, common.Fatal(err)
 	}
 	if username != "" {
 		taskUser, err = user.Lookup(username)
 		if err != nil {
-			return nil, Fatal(err)
+			return nil, common.Fatal(err)
 		}
 	}
 
@@ -56,8 +57,8 @@ func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon
 		taskDir = taskUser.HomeDir
 	}
 
-	if !IsDir(taskDir) {
-		return nil, Fatalf("not directory: %s", taskDir)
+	if !common.IsDir(taskDir) {
+		return nil, common.Fatalf("not directory: %s", taskDir)
 	}
 
 	var daemon CobraDaemon
@@ -65,20 +66,20 @@ func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon
 	case "windows":
 		daemon, err = NewWindowsTask(name, taskUser, taskDir, command, args...)
 		if err != nil {
-			return nil, Fatal(err)
+			return nil, common.Fatal(err)
 		}
 	case "openbsd":
 		daemon, err = NewRCDaemon(name, taskUser, taskDir, command, args...)
 		if err != nil {
-			return nil, Fatal(err)
+			return nil, common.Fatal(err)
 		}
 	case "linux":
 		daemon, err = NewDaemontools(name, taskUser, taskDir, command, args...)
 		if err != nil {
-			return nil, Fatal(err)
+			return nil, common.Fatal(err)
 		}
 	default:
-		return nil, Fatalf("unsuported os: %s", runtime.GOOS)
+		return nil, common.Fatalf("unsuported os: %s", runtime.GOOS)
 	}
 	return daemon, nil
 }
