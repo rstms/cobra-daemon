@@ -25,6 +25,7 @@ package daemon
 import (
 	"github.com/rstms/go-common"
 	"os/user"
+	"regexp"
 	"runtime"
 )
 
@@ -40,6 +41,10 @@ type CobraDaemon interface {
 }
 
 func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon, error) {
+
+	if !regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`).MatchString(name) {
+		return nil, common.Fatalf("invalid characters in name: %s", name)
+	}
 
 	taskUser, err := user.Current()
 	if err != nil {
