@@ -3,7 +3,7 @@ module github.com/rstms/cobra-daemon
 go 1.25.1
 
 require (
-	github.com/rstms/go-common v0.2.50
+	github.com/rstms/go-common v0.2.51
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
