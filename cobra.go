@@ -49,9 +49,11 @@ Windows  | schtasks.exe | internal XML config
 
 func initDaemon() CobraDaemon {
 
-	if len(daemonArgs) > 0 {
-		ViperSetDefault("daemon.name", daemonArgs[0])
+	if len(daemonArgs) < 1 {
+		cobra.CheckErr(Fatalf("missing daemon args"))
 	}
+
+	ViperSetDefault("daemon.name", daemonArgs[0])
 
 	systemUser, err := user.Current()
 	cobra.CheckErr(err)
@@ -183,7 +185,7 @@ return 0 if netboot/winexec daemon is running, 1 if not
 }
 
 func AddDaemonCommands(rootCmd *cobra.Command, args ...string) {
-	daemonArgs = args
+	daemonArgs = append([]string{rootCmd.Name()}, args...)
 	CobraAddCommand(rootCmd, rootCmd, daemonCmd)
 	CobraAddCommand(rootCmd, daemonCmd, daemonInstallCmd)
 	CobraAddCommand(rootCmd, daemonCmd, daemonStartCmd)
