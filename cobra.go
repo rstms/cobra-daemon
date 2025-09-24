@@ -38,7 +38,7 @@ var daemonCmd = &cobra.Command{
 	Short: "daemon commands",
 	Long: `
 
-subcommands for netboot/winexec daemon management  
+subcommands for daemon management  
 
 OS       | Utility      | Config File
 -------- | ------------ | --------------------- 
@@ -85,7 +85,7 @@ var daemonInstallCmd = &cobra.Command{
 	Use:   "install",
 	Short: "install daemon",
 	Long: `
-install netboot/winexec daemon config
+install daemon config
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -104,7 +104,7 @@ var daemonStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "start daemon",
 	Long: `
-start netboot/winexec daemon
+start daemon
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -118,7 +118,7 @@ var daemonStopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "stop daemon",
 	Long: `
-stop netboot/winexec daemon
+stop daemon
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -132,7 +132,7 @@ var daemonRestartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "restart daemon",
 	Long: `
-restart netboot/winexec daemon
+restart daemon
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -148,7 +148,7 @@ var daemonDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "delete daemon",
 	Long: `
-delete netboot/winexec daemon config
+delete daemon config
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -162,7 +162,7 @@ var daemonShowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "show daemon config",
 	Long: `
-show netboot/winexec daemon config
+show daemon config
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -177,7 +177,7 @@ var daemonQueryCmd = &cobra.Command{
 	Use:   "query",
 	Short: "query daemon status",
 	Long: `
-return 0 if netboot/winexec daemon is running, 1 if not
+return 0 if daemon is running, 1 if not
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		d := initDaemon()
