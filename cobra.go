@@ -29,7 +29,6 @@ import (
 	"path/filepath"
 )
 
-var daemonCommand string
 var daemonArgs []string
 
 var daemonCmd = &cobra.Command{
@@ -49,7 +48,9 @@ Windows  | schtasks.exe | internal XML config
 }
 
 func initDaemon() CobraDaemon {
-	ViperSetDefault("daemon.name", daemonCommand)
+	if len(daemonArgs) > 0 {
+		ViperSetDefault("daemon.name", daemonArgs[0])
+	}
 
 	systemUser, err := user.Current()
 	cobra.CheckErr(err)
@@ -64,8 +65,7 @@ func initDaemon() CobraDaemon {
 	dir := ViperGetString("daemon.dir")
 	executable, err := os.Executable()
 	cobra.CheckErr(err)
-	args := append([]string{daemonCommand}, daemonArgs...)
-	d, err := NewDaemon(name, user, dir, filepath.Clean(executable), args...)
+	d, err := NewDaemon(name, user, dir, filepath.Clean(executable), daemonArgs...)
 	cobra.CheckErr(err)
 	return d
 }
@@ -181,8 +181,7 @@ return 0 if netboot/winexec daemon is running, 1 if not
 	},
 }
 
-func AddDaemonCommands(rootCmd *cobra.Command, command string, args []string) {
-	daemonCommand = command
+func AddDaemonCommands(rootCmd *cobra.Command, args ...string) {
 	daemonArgs = args
 	CobraAddCommand(rootCmd, rootCmd, daemonCmd)
 	CobraAddCommand(rootCmd, daemonCmd, daemonInstallCmd)
