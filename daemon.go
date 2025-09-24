@@ -29,7 +29,7 @@ import (
 
 const Version = "0.0.4"
 
-type Daemon interface {
+type CobraDaemon interface {
 	Install() error
 	Delete() error
 	Start() error
@@ -38,7 +38,7 @@ type Daemon interface {
 	Query() (bool, error)
 }
 
-func NewDaemon(name, username, dir, command string, args ...string) (Daemon, error) {
+func NewDaemon(name, username, dir, command string, args ...string) (CobraDaemon, error) {
 
 	taskUser, err := user.Current()
 	if err != nil {
@@ -60,7 +60,7 @@ func NewDaemon(name, username, dir, command string, args ...string) (Daemon, err
 		return nil, Fatalf("not directory: %s", taskDir)
 	}
 
-	var daemon Daemon
+	var daemon CobraDaemon
 	switch runtime.GOOS {
 	case "windows":
 		daemon, err = NewWindowsTask(name, taskUser, taskDir, command, args...)

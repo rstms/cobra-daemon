@@ -25,16 +25,12 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
-type DaemonProcess interface {
-	Start() error
-	Stop() error
-	Run() error
-}
-
-var factory func() (DaemonProcess, error)
+var daemonCommand string
+var daemonArgs []string
 
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
@@ -52,24 +48,24 @@ Windows  | schtasks.exe | internal XML config
 `,
 }
 
-func initDaemon() Daemon {
-	var command string
-	switch {
-	case ViperGetBool("daemon.winexec"):
-		command = "winexec"
-	case ViperGetBool("daemon.netboot"):
-		command = "netboot"
-	}
-	if command == "" {
-		cobra.CheckErr(Fatalf("missing daemon command"))
-	}
-	ViperSetDefault("daemon.name", command)
+func initDaemon() CobraDaemon {
+	ViperSetDefault("daemon.name", daemonCommand)
+
+	systemUser, err := user.Current()
+	cobra.CheckErr(err)
+	ViperSetDefault("daemon.user", systemUser.Username)
+
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+	ViperSetDefault("daemon.dir", homeDir)
+
 	name := ViperGetString("daemon.name")
 	user := ViperGetString("daemon.user")
 	dir := ViperGetString("daemon.dir")
 	executable, err := os.Executable()
 	cobra.CheckErr(err)
-	d, err := NewDaemon(name, user, dir, filepath.Clean(executable), command, "server")
+	args := append([]string{daemonCommand}, daemonArgs...)
+	d, err := NewDaemon(name, user, dir, filepath.Clean(executable), args...)
 	cobra.CheckErr(err)
 	return d
 }
@@ -185,8 +181,9 @@ return 0 if netboot/winexec daemon is running, 1 if not
 	},
 }
 
-func AddDaemonCommands(rootCmd *cobra.Command, init func() (DaemonProcess, error)) {
-	factory = init
+func AddDaemonCommands(rootCmd *cobra.Command, command string, args []string) {
+	daemonCommand = command
+	daemonArgs = args
 	CobraAddCommand(rootCmd, rootCmd, daemonCmd)
 	CobraAddCommand(rootCmd, daemonCmd, daemonInstallCmd)
 	CobraAddCommand(rootCmd, daemonCmd, daemonStartCmd)
@@ -198,9 +195,4 @@ func AddDaemonCommands(rootCmd *cobra.Command, init func() (DaemonProcess, error
 	OptionString(daemonCmd, "name", "", "", "daemon name")
 	OptionString(daemonCmd, "user", "", "", "run as username")
 	OptionString(daemonCmd, "dir", "", "", "run directory")
-	OptionSwitch(daemonCmd, "winexec", "", "select winexec daemon")
-	OptionSwitch(daemonCmd, "netboot", "", "select winexec daemon")
-	daemonCmd.MarkFlagsMutuallyExclusive("netboot", "winexec")
-	daemonCmd.MarkFlagsOneRequired("netboot", "winexec")
-
 }

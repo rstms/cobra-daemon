@@ -47,7 +47,7 @@ type RCDaemon struct {
 	serviceBin string
 }
 
-func NewRCDaemon(name string, daemonUser *user.User, runDir string, command string, args ...string) (Daemon, error) {
+func NewRCDaemon(name string, daemonUser *user.User, runDir string, command string, args ...string) (CobraDaemon, error) {
 
 	logFile := filepath.Join("/var/log", name)
 	_, basename := filepath.Split(command)

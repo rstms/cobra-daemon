@@ -52,7 +52,7 @@ type Daemontools struct {
 	serviceBin string
 }
 
-func NewDaemontools(name string, serviceUser *user.User, runDir string, command string, args ...string) (Daemon, error) {
+func NewDaemontools(name string, serviceUser *user.User, runDir string, command string, args ...string) (CobraDaemon, error) {
 
 	serviceDir := filepath.Join("/etc/service", name)
 	_, basename := filepath.Split(command)

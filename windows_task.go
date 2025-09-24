@@ -46,7 +46,7 @@ type WindowsTask struct {
 	LogFile    string
 }
 
-func NewWindowsTask(taskName string, taskUser *user.User, taskDir string, taskCommand string, taskArgs ...string) (Daemon, error) {
+func NewWindowsTask(taskName string, taskUser *user.User, taskDir string, taskCommand string, taskArgs ...string) (CobraDaemon, error) {
 
 	logDir := filepath.Join(taskUser.HomeDir, "logs")
 	err := os.MkdirAll(logDir, 0700)
