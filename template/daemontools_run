@@ -1,0 +1,8 @@
+#!/bin/sh
+exec 2>&1
+cd ${TASK_DIR}
+exec \
+    setuidgid ${TASK_USER} \
+    env HOME=${TASK_DIR} \
+    ${TASK_BIN} \
+    ${TASK_ARGS}

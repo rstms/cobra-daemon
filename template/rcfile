@@ -1,0 +1,12 @@
+#!/bin/ksh
+
+daemon="${TASK_BIN} ${TASK_ARGS}"
+daemon_user=${TASK_USER}
+daemon_flags=
+daemon_logger=
+daemon_execdir=${TASK_DIR}
+rc_bg=YES
+
+. /etc/rc.d/rc.subr
+
+rc_cmd $1
