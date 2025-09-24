@@ -27,7 +27,7 @@ import (
 	"runtime"
 )
 
-const Version = "0.0.6"
+const Version = "0.0.7"
 
 type CobraDaemon interface {
 	Install() error
